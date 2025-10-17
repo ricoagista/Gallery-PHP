@@ -24,7 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (move_uploaded_file($file['tmp_name'], $targetPath)) {
             // Simpan ke database (nama file + judul + waktu)
             $stmt = $conn->prepare("INSERT INTO images (filename, title) VALUES (?, ?)");
-            $stmt->execute([$filename, $title]);
+            $stmt->bind_param("ss", $filename, $title);
+            $stmt->execute();
+            $stmt->close();
 
             header("Location: index.php?upload=success");
             exit;

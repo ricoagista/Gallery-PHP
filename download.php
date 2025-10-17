@@ -10,13 +10,15 @@ $id = intval($_GET['id']);
 
 // Ambil info gambar dari database
 $stmt = $conn->prepare("SELECT filename FROM images WHERE id = ?");
-$stmt->execute([$id]);
-$row = $stmt->fetch();
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
 
-if (!$row) {
+if ($result->num_rows === 0) {
     die("Gambar tidak ditemukan");
 }
 
+$row = $result->fetch_assoc();
 $filename = basename($row['filename']); // Keamanan: hindari directory traversal
 $filepath = UPLOAD_PATH . $filename;
 
@@ -40,5 +42,7 @@ header('Pragma: no-cache');
 // Baca dan kirim file (metadata tetap utuh karena tidak ada manipulasi)
 readfile($filepath);
 
+$stmt->close();
+$conn->close();
 exit;
 ?>

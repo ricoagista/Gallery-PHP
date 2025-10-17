@@ -10,7 +10,8 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 }
 
 // Ambil semua gambar
-$stmt = $conn->query("SELECT * FROM images ORDER BY uploaded_at DESC");
+$sql = "SELECT * FROM images ORDER BY uploaded_at DESC";
+$result = $conn->query($sql);
 
 // Handle logout
 if (isset($_GET['logout'])) {
@@ -65,7 +66,7 @@ if (isset($_GET['logout'])) {
         <div class="table-container">
             <h3 class="mb-4">Daftar Gambar</h3>
             
-            <?php if ($stmt && $stmt->rowCount() > 0): ?>
+            <?php if ($result && $result->num_rows > 0): ?>
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
@@ -78,7 +79,7 @@ if (isset($_GET['logout'])) {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php while($row = $stmt->fetch()): ?>
+                            <?php while($row = $result->fetch_assoc()): ?>
                                 <tr>
                                     <td><?php echo $row['id']; ?></td>
                                     <td><?php echo htmlspecialchars($row['title'] ?? 'Untitled'); ?></td>
@@ -107,4 +108,4 @@ if (isset($_GET['logout'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-<?php $conn = null; ?>
+<?php $conn->close(); ?>

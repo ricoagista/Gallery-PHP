@@ -1,40 +1,34 @@
 <?php
-// config.php - Konfigurasi database SQLite
+// config.php - Konfigurasi database
 
-// Path untuk database dan uploads
-define('DB_PATH', __DIR__ . '/data/gallery.sqlite');
-define('UPLOAD_PATH', __DIR__ . '/uploads/');
+// Konfigurasi database
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', 'sriwijaya');
+define('DB_NAME', 'ctf_gallery');
 
-// Buat folder data jika belum ada
-if (!file_exists(__DIR__ . '/data')) {
-    mkdir(__DIR__ . '/data', 0755, true);
+// Koneksi ke database
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+
+// Cek koneksi
+if ($conn->connect_error) {
+    die("Koneksi database gagal: " . $conn->connect_error);
 }
+
+// Set charset
+$conn->set_charset("utf8mb4");
+
+// Path untuk upload
+define('UPLOAD_PATH', __DIR__ . '/uploads/');
 
 // Buat folder uploads jika belum ada
 if (!file_exists(UPLOAD_PATH)) {
     mkdir(UPLOAD_PATH, 0755, true);
 }
 
-// Koneksi database SQLite
-try {
-    $conn = new PDO('sqlite:' . DB_PATH);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-    
-    // Enable foreign keys
-    $conn->exec('PRAGMA foreign_keys = ON');
-    
-    // Inisialisasi tabel jika belum ada
-    $conn->exec("
-        CREATE TABLE IF NOT EXISTS images (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            filename TEXT NOT NULL,
-            title TEXT NOT NULL DEFAULT 'Untitled',
-            uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ");
-    
-} catch (PDOException $e) {
-    die("Koneksi database gagal: " . $e->getMessage());
+// Tambahkan kolom title jika belum ada
+$result = $conn->query("SHOW COLUMNS FROM `images` LIKE 'title'");
+if ($result->num_rows == 0) {
+    $conn->query("ALTER TABLE `images` ADD `title` VARCHAR(255) NOT NULL DEFAULT 'Untitled' AFTER `filename`");
 }
 ?>
