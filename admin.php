@@ -1,5 +1,7 @@
 <?php
 include 'config.php';
+session_start();
+
 if (!isset($_SESSION['admin'])) {
     header("Location: login.php");
     exit;
@@ -10,11 +12,13 @@ echo "<!-- Admin logged in: " . $_SESSION['admin'] . " -->";
 
 if (isset($_GET['del'])) {
     $id = intval($_GET['del']);
-    $res = $conn->query("SELECT filename FROM images WHERE id=$id");
-    if ($row = $res->fetch_assoc()) {
-        unlink("uploads/" . $row['filename']);
+    $stmt = $conn->prepare("SELECT filename FROM images WHERE id = ?");
+    $stmt->execute([$id]);
+    if ($row = $stmt->fetch()) {
+        @unlink("uploads/" . $row['filename']);
     }
-    $conn->query("DELETE FROM images WHERE id=$id");
+    $stmt = $conn->prepare("DELETE FROM images WHERE id = ?");
+    $stmt->execute([$id]);
     header("Location: admin.php?deleted");
 }
 ?>
@@ -46,8 +50,8 @@ if (isset($_GET['del'])) {
 
   <div class="row justify-content-center">
     <?php
-    $result = $conn->query("SELECT * FROM images ORDER BY uploaded_at DESC");
-    while ($row = $result->fetch_assoc()):
+    $stmt = $conn->query("SELECT * FROM images ORDER BY uploaded_at DESC");
+    while ($row = $stmt->fetch()):
     ?>
     <div class="col-md-3 col-sm-6 mb-4">
       <div class="card shadow-sm">
@@ -55,7 +59,7 @@ if (isset($_GET['del'])) {
              class="card-img-top" style="height:200px; object-fit:cover;">
         <div class="card-body">
           <h5 class="card-title mb-2"><?php echo htmlspecialchars($row['title'] ?? 'Untitled'); ?></h5>
-          <a href="delete.php?id=<?php echo $row['id']; ?>"
+          <a href="admin.php?del=<?php echo $row['id']; ?>"
              onclick="return confirm('Yakin ingin menghapus gambar ini?')"
              class="btn btn-danger w-100">Delete</a>
         </div>

@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Ignore SQLite database files
+*.sqlite filter=lfs diff=lfs merge=lfs -text
+data/ filter=lfs diff=lfs merge=lfs -text

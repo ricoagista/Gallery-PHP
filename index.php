@@ -3,8 +3,7 @@
 require_once 'config.php';
 
 // Ambil semua gambar dari database
-$sql = "SELECT * FROM images ORDER BY uploaded_at DESC";
-$result = $conn->query($sql);
+$stmt = $conn->query("SELECT * FROM images ORDER BY uploaded_at DESC");
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -101,8 +100,8 @@ $result = $conn->query($sql);
             $colors = ['#5C6BF2', '#F25CA2', '#3DDC84', '#FF8A00', '#06B6D4', '#7C4DFF'];
             $index = 0;
             
-            if ($result && $result->num_rows > 0):
-                while($row = $result->fetch_assoc()): 
+            if ($stmt && $stmt->rowCount() > 0):
+                while($row = $stmt->fetch()): 
                     $color = $colors[$index % count($colors)];
                     $index++;
                     $image_path = 'uploads/' . htmlspecialchars($row['filename']);
@@ -139,4 +138,4 @@ $result = $conn->query($sql);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-<?php $conn->close(); ?>
+<?php $conn = null; ?>
